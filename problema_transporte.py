@@ -282,7 +282,7 @@ class ProblemaTransporte:
                 mejor_fila = i
         return mejor_fila
 
-    def __imprimir_solucion(self, nombre_metodo, solucion):
+    def __imprimir_solucion(self, nombre_metodo, solucion): #salida de datos
         print(nombre_metodo)
         for origen, destino, cantidad, costo_unitario in solucion["asignaciones"]:
             print(f"  {origen} -> {destino}: {cantidad} unidades a costo {costo_unitario}")
