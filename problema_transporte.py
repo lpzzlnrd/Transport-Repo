@@ -1,295 +1,278 @@
 from copy import deepcopy
 
 
-class ProblemaTransporte:
+# Guarda los datos de cada problema de asignacion
+class ProblemaAsignacion:
+    def __init__(self, nombre, trabajadores, tareas, costos, unidad):
+        self.__nombre = nombre
+        self.__trabajadores = trabajadores
+        self.__tareas = tareas
+        self.__costos = costos
+        self.__unidad = unidad
 
-    #metodo para privatizar las variables del sistema
-    def __init__(self):
-        self.__origenes = ["Origen 1", "Origen 2", "Origen 3"]
-        self.__destinos = ["Destino A", "Destino B", "Destino C", "Destino D"]
-        self.__ofertas = [500, 700, 600]
-        self.__demandas = [600, 300, 400, 500]
-        self.__costos = [
-            [45, 80, 75, 65],
-            [60, 50, 48, 52],
-            [90, 85, 60, 70],
-        ]
+    def obtener_nombre(self):
+        return self.__nombre
 
-        #metodo para obtener los datos del problema
-    def obtener_datos(self):
-        return {
-            "origenes": deepcopy(self.__origenes),
-            "destinos": deepcopy(self.__destinos),
-            "ofertas": deepcopy(self.__ofertas),
-            "demandas": deepcopy(self.__demandas),
-            "costos": deepcopy(self.__costos),
-        }
+    def obtener_unidad(self):
+        return self.__unidad
 
-    #metodo para obtener la resolucion del problema
-    def obtener_resolucion(self):
-        origenes, destinos, ofertas, demandas, costos = self.__equilibrar_problema()
+    def obtener_trabajadores(self):
+        return deepcopy(self.__trabajadores)
 
-        solucion_esquina = self.__resolver_esquina_noroeste(origenes, destinos, ofertas, demandas, costos)
-        solucion_minimo = self.__resolver_costo_minimo(origenes, destinos, ofertas, demandas, costos)
-        solucion_vogel = self.__resolver_vogel(origenes, destinos, ofertas, demandas, costos)
+    def obtener_tareas(self):
+        return deepcopy(self.__tareas)
 
-        return { #retorna un diccinario
-            "balanceado": self.__es_balanceado(),
-            "origenes": origenes,
-            "destinos": destinos,
-            "esquina_noroeste": solucion_esquina,
-            "costo_minimo": solucion_minimo,
-            "vogel": solucion_vogel,
-        }
+    def obtener_costos(self):
+        return deepcopy(self.__costos)
 
-    def imprimir_resumen(self):
-        resolucion = self.obtener_resolucion()
 
-        print("Problema balanceado:", "Sí" if resolucion["balanceado"] else "No")
+# Guarda y muestra la solucion final del problema
+class ResultadoAsignacion:
+    def __init__(self, problema, asignaciones, costo_total, pasos):
+        self.__problema = problema
+        self.__asignaciones = asignaciones
+        self.__costo_total = costo_total
+        self.__pasos = pasos
+
+    def imprimir(self):
+        print("=" * 70)
+        print(self.__problema.obtener_nombre())
+        print("=" * 70)
+        print()
+        self.__imprimir_matriz_original()
+        self.__imprimir_pasos()
+        self.__imprimir_asignaciones()
+        self.__imprimir_conclusion()
         print()
 
-        self.__imprimir_solucion("Método de la Esquina Noroeste", resolucion["esquina_noroeste"])
-        self.__imprimir_solucion("Método del Costo Mínimo", resolucion["costo_minimo"])
-        self.__imprimir_solucion("Método de Aproximación de Vogel", resolucion["vogel"])
+    def __imprimir_matriz_original(self):
+        print("Matriz original")
+        self.__imprimir_matriz(self.__problema.obtener_costos())
+        print()
 
-        mejor_metodo = min(
-            [
-                ("Esquina Noroeste", resolucion["esquina_noroeste"]["costo_total"]),
-                ("Costo Mínimo", resolucion["costo_minimo"]["costo_total"]),
-                ("Vogel", resolucion["vogel"]["costo_total"]),
-            ],
-            key=lambda elemento: elemento[1], #se usa un lambda para ordenar un valor como el minimo
+    def __imprimir_pasos(self):
+        for paso in self.__pasos:
+            print(paso["titulo"])
+            self.__imprimir_matriz(paso["matriz"])
+            if paso.get("detalle"):
+                print(paso["detalle"])
+            print()
+
+    def __imprimir_asignaciones(self):
+        print("Asignacion optima")
+        for trabajador, tarea, costo in self.__asignaciones:
+            print(f"{trabajador} -> {tarea}: {costo} {self.__problema.obtener_unidad()}")
+        print(f"Costo minimo total: {self.__costo_total} {self.__problema.obtener_unidad()}")
+        print()
+
+    def __imprimir_conclusion(self):
+        print("Conclusion")
+        print(
+            "La asignacion encontrada minimiza el costo total porque cada trabajador "
+            "queda unido a una sola tarea y se selecciona una combinacion de ceros "
+            "independientes despues de las reducciones del metodo hungaro."
         )
 
-        print("Método con menor costo:", mejor_metodo[0])
-        print("Costo más bajo:", mejor_metodo[1])
-
-    def __es_balanceado(self):
-        return sum(self.__ofertas) == sum(self.__demandas)
-
-    def __equilibrar_problema(self):
-        origenes = deepcopy(self.__origenes)
-        destinos = deepcopy(self.__destinos)
-        ofertas = deepcopy(self.__ofertas)
-        demandas = deepcopy(self.__demandas)
-        costos = deepcopy(self.__costos)
-
-        total_oferta = sum(ofertas)
-        total_demanda = sum(demandas)
-
-        if total_oferta > total_demanda:
-            diferencia = total_oferta - total_demanda
-            destinos.append("Destino ficticio")
-            demandas.append(diferencia)
-            for fila in costos:
-                fila.append(0)
-        elif total_demanda > total_oferta:
-            diferencia = total_demanda - total_oferta
-            origenes.append("Origen ficticio")
-            ofertas.append(diferencia)
-            costos.append([0 for _ in destinos])
-
-        return origenes, destinos, ofertas, demandas, costos
-
-    def __resolver_esquina_noroeste(self, origenes, destinos, ofertas, demandas, costos):
-        ofertas_restantes = ofertas[:]
-        demandas_restantes = demandas[:]
-        asignaciones = []
-        costo_total = 0
-
-        i = 0
-        j = 0
-        while i < len(origenes) and j < len(destinos):
-            cantidad = min(ofertas_restantes[i], demandas_restantes[j])
-            if cantidad > 0:
-                asignaciones.append((origenes[i], destinos[j], cantidad, costos[i][j]))
-                costo_total += cantidad * costos[i][j]
-
-            ofertas_restantes[i] -= cantidad
-            demandas_restantes[j] -= cantidad
-
-            if ofertas_restantes[i] == 0 and demandas_restantes[j] == 0:
-                i += 1
-                j += 1
-            elif ofertas_restantes[i] == 0:
-                i += 1
-            else:
-                j += 1
-
-        return {"asignaciones": asignaciones, "costo_total": costo_total}
-
-    def __resolver_costo_minimo(self, origenes, destinos, ofertas, demandas, costos):
-        ofertas_restantes = ofertas[:]
-        demandas_restantes = demandas[:]
-        filas_activas = [True] * len(origenes)
-        columnas_activas = [True] * len(destinos)
-        asignaciones = []
-        costo_total = 0
-
-        while True:
-            mejor_fila = -1
-            mejor_columna = -1
-            menor_costo = None
-
-            for i in range(len(origenes)):
-                if not filas_activas[i]:
-                    continue
-                for j in range(len(destinos)):
-                    if not columnas_activas[j]:
-                        continue
-                    costo_actual = costos[i][j]
-                    if menor_costo is None or costo_actual < menor_costo:
-                        menor_costo = costo_actual
-                        mejor_fila = i
-                        mejor_columna = j
-
-            if menor_costo is None:
-                break
-
-            cantidad = min(ofertas_restantes[mejor_fila], demandas_restantes[mejor_columna])
-            asignaciones.append(
-                (origenes[mejor_fila], destinos[mejor_columna], cantidad, costos[mejor_fila][mejor_columna])
-            )
-            costo_total += cantidad * costos[mejor_fila][mejor_columna]
-
-            ofertas_restantes[mejor_fila] -= cantidad
-            demandas_restantes[mejor_columna] -= cantidad
-
-            if ofertas_restantes[mejor_fila] == 0:
-                filas_activas[mejor_fila] = False
-            if demandas_restantes[mejor_columna] == 0:
-                columnas_activas[mejor_columna] = False
-
-        return {"asignaciones": asignaciones, "costo_total": costo_total}
-
-    def __resolver_vogel(self, origenes, destinos, ofertas, demandas, costos):
-        ofertas_restantes = ofertas[:]
-        demandas_restantes = demandas[:]
-        filas_activas = [True] * len(origenes)
-        columnas_activas = [True] * len(destinos)
-        asignaciones = []
-        costo_total = 0
-
-        while True:
-            if not any(filas_activas) or not any(columnas_activas):
-                break
-
-            penalizacion_filas = self.__calcular_penalizaciones_filas(costos, filas_activas, columnas_activas)
-            penalizacion_columnas = self.__calcular_penalizaciones_columnas(costos, filas_activas, columnas_activas)
-
-            mayor_penalizacion = -1
-            tipo_seleccion = None
-            indice_seleccionado = -1
-
-            for indice, penalizacion in enumerate(penalizacion_filas):
-                if penalizacion > mayor_penalizacion:
-                    mayor_penalizacion = penalizacion
-                    tipo_seleccion = "fila"
-                    indice_seleccionado = indice
-
-            for indice, penalizacion in enumerate(penalizacion_columnas):
-                if penalizacion > mayor_penalizacion:
-                    mayor_penalizacion = penalizacion
-                    tipo_seleccion = "columna"
-                    indice_seleccionado = indice
-
-            if tipo_seleccion == "fila":
-                fila = indice_seleccionado
-                columna = self.__buscar_menor_costo_en_fila(costos, fila, columnas_activas)
-            else:
-                columna = indice_seleccionado
-                fila = self.__buscar_menor_costo_en_columna(costos, columna, filas_activas)
-
-            cantidad = min(ofertas_restantes[fila], demandas_restantes[columna])
-            asignaciones.append((origenes[fila], destinos[columna], cantidad, costos[fila][columna]))
-            costo_total += cantidad * costos[fila][columna]
-
-            ofertas_restantes[fila] -= cantidad
-            demandas_restantes[columna] -= cantidad
-
-            if ofertas_restantes[fila] == 0:
-                filas_activas[fila] = False
-            if demandas_restantes[columna] == 0:
-                columnas_activas[columna] = False
-
-        return {"asignaciones": asignaciones, "costo_total": costo_total}
-
-    def __calcular_penalizaciones_filas(self, costos, filas_activas, columnas_activas):
-        penalizaciones = []
-        for i in range(len(costos)):
-            if not filas_activas[i]:
-                penalizaciones.append(-1)
-                continue
-
-            costos_fila = []
-            for j in range(len(costos[i])):
-                if columnas_activas[j]:
-                    costos_fila.append(costos[i][j])
-
-            costos_fila.sort()
-            if len(costos_fila) >= 2:
-                penalizaciones.append(costos_fila[1] - costos_fila[0])
-            elif len(costos_fila) == 1:
-                penalizaciones.append(costos_fila[0])
-            else:
-                penalizaciones.append(-1)
-
-        return penalizaciones
-
-    def __calcular_penalizaciones_columnas(self, costos, filas_activas, columnas_activas):
-        penalizaciones = []
-        for j in range(len(costos[0])):
-            if not columnas_activas[j]:
-                penalizaciones.append(-1)
-                continue
-
-            costos_columna = []
-            for i in range(len(costos)):
-                if filas_activas[i]:
-                    costos_columna.append(costos[i][j])
-
-            costos_columna.sort()
-            if len(costos_columna) >= 2:
-                penalizaciones.append(costos_columna[1] - costos_columna[0])
-            elif len(costos_columna) == 1:
-                penalizaciones.append(costos_columna[0])
-            else:
-                penalizaciones.append(-1)
-
-        return penalizaciones
-
-    def __buscar_menor_costo_en_fila(self, costos, fila, columnas_activas):
-        menor_costo = None
-        mejor_columna = -1
-        for j in range(len(costos[fila])):
-            if not columnas_activas[j]:
-                continue
-            costo_actual = costos[fila][j]
-            if menor_costo is None or costo_actual < menor_costo:
-                menor_costo = costo_actual
-                mejor_columna = j
-        return mejor_columna
-
-    def __buscar_menor_costo_en_columna(self, costos, columna, filas_activas):
-        menor_costo = None
-        mejor_fila = -1
-        for i in range(len(costos)):
-            if not filas_activas[i]:
-                continue
-            costo_actual = costos[i][columna]
-            if menor_costo is None or costo_actual < menor_costo:
-                menor_costo = costo_actual
-                mejor_fila = i
-        return mejor_fila
-
-    def __imprimir_solucion(self, nombre_metodo, solucion): #salida de datos
-        print(nombre_metodo)
-        for origen, destino, cantidad, costo_unitario in solucion["asignaciones"]:
-            print(f"  {origen} -> {destino}: {cantidad} unidades a costo {costo_unitario}")
-        print(f"  Costo total: {solucion['costo_total']}")
+    def __imprimir_matriz(self, matriz):
+        tareas = self.__problema.obtener_tareas()
+        ancho = 14
+        print("".ljust(ancho), end="")
+        for tarea in tareas:
+            print(tarea.rjust(ancho), end="")
         print()
+
+        trabajadores = self.__problema.obtener_trabajadores()
+        for indice, fila in enumerate(matriz):
+            print(trabajadores[indice].ljust(ancho), end="")
+            for valor in fila:
+                print(str(valor).rjust(ancho), end="")
+            print()
+
+
+# Aplica el metodo hungaro para minimizar costos
+class MetodoHungaro:
+    def resolver(self, problema):
+        matriz_original = problema.obtener_costos()
+        self.__validar_matriz(matriz_original)
+
+        matriz = deepcopy(matriz_original)
+        pasos = []
+
+        self.__reducir_filas(matriz)
+        pasos.append({"titulo": "Paso 1: reduccion por filas", "matriz": deepcopy(matriz)})
+
+        self.__reducir_columnas(matriz)
+        pasos.append({"titulo": "Paso 2: reduccion por columnas", "matriz": deepcopy(matriz)})
+
+        asignacion = self.__buscar_asignacion_completa(matriz)
+
+        while asignacion is None:
+            cobertura = self.__obtener_cobertura_minima(matriz)
+            self.__ajustar_matriz(matriz, cobertura)
+            detalle = (
+                f"Lineas usadas: {len(cobertura['filas']) + len(cobertura['columnas'])}. "
+                f"Filas cubiertas: {self.__formatear_indices(cobertura['filas'])}. "
+                f"Columnas cubiertas: {self.__formatear_indices(cobertura['columnas'])}."
+            )
+            pasos.append({"titulo": "Paso 3: ajuste de la matriz", "matriz": deepcopy(matriz), "detalle": detalle})
+            asignacion = self.__buscar_asignacion_completa(matriz)
+
+        trabajadores = problema.obtener_trabajadores()
+        tareas = problema.obtener_tareas()
+        asignaciones = []
+        costo_total = 0
+
+        for fila, columna in sorted(asignacion.items()):
+            costo = matriz_original[fila][columna]
+            asignaciones.append((trabajadores[fila], tareas[columna], costo))
+            costo_total += costo
+
+        return ResultadoAsignacion(problema, asignaciones, costo_total, pasos)
+
+    def __validar_matriz(self, matriz):
+        if not matriz or len(matriz) != len(matriz[0]):
+            raise ValueError("El metodo hungaro requiere una matriz cuadrada")
+
+        tamano = len(matriz)
+        for fila in matriz:
+            if len(fila) != tamano:
+                raise ValueError("Todas las filas deben tener el mismo tamano")
+
+    def __reducir_filas(self, matriz):
+        # Resta el menor valor de cada fila
+        for fila in matriz:
+            menor = min(fila)
+            for columna in range(len(fila)):
+                fila[columna] -= menor
+
+    def __reducir_columnas(self, matriz):
+        # Resta el menor valor de cada columna
+        tamano = len(matriz)
+        for columna in range(tamano):
+            menor = min(matriz[fila][columna] for fila in range(tamano))
+            for fila in range(tamano):
+                matriz[fila][columna] -= menor
+
+    def __buscar_asignacion_completa(self, matriz):
+        emparejamiento = self.__emparejar_ceros(matriz)
+        if len(emparejamiento) != len(matriz):
+            return None
+        return {fila: columna for columna, fila in emparejamiento.items()}
+
+    def __emparejar_ceros(self, matriz):
+        tamano = len(matriz)
+        emparejamiento = {}
+
+        for fila in range(tamano):
+            visitadas = set()
+            self.__intentar_emparejar(fila, matriz, visitadas, emparejamiento)
+
+        return emparejamiento
+
+    def __intentar_emparejar(self, fila, matriz, visitadas, emparejamiento):
+        for columna, valor in enumerate(matriz[fila]):
+            if valor != 0 or columna in visitadas:
+                continue
+
+            visitadas.add(columna)
+            if columna not in emparejamiento or self.__intentar_emparejar(
+                emparejamiento[columna], matriz, visitadas, emparejamiento
+            ):
+                emparejamiento[columna] = fila
+                return True
+
+        return False
+
+    def __obtener_cobertura_minima(self, matriz):
+        tamano = len(matriz)
+        emparejamiento = self.__emparejar_ceros(matriz)
+        filas_emparejadas = set(emparejamiento.values())
+        filas_visitadas = {fila for fila in range(tamano) if fila not in filas_emparejadas}
+        columnas_visitadas = set()
+
+        cambio = True
+        while cambio:
+            cambio = False
+
+            for fila in list(filas_visitadas):
+                for columna, valor in enumerate(matriz[fila]):
+                    if valor == 0 and columna not in columnas_visitadas:
+                        columnas_visitadas.add(columna)
+                        cambio = True
+
+            for columna in list(columnas_visitadas):
+                if columna in emparejamiento and emparejamiento[columna] not in filas_visitadas:
+                    filas_visitadas.add(emparejamiento[columna])
+                    cambio = True
+
+        filas_cubiertas = set(range(tamano)) - filas_visitadas
+        columnas_cubiertas = columnas_visitadas
+        return {"filas": filas_cubiertas, "columnas": columnas_cubiertas}
+
+    def __ajustar_matriz(self, matriz, cobertura):
+        # Crea nuevos ceros cuando no existe asignacion completa
+        tamano = len(matriz)
+        no_cubiertos = []
+
+        for fila in range(tamano):
+            for columna in range(tamano):
+                if fila not in cobertura["filas"] and columna not in cobertura["columnas"]:
+                    no_cubiertos.append(matriz[fila][columna])
+
+        menor = min(no_cubiertos)
+
+        for fila in range(tamano):
+            for columna in range(tamano):
+                fila_cubierta = fila in cobertura["filas"]
+                columna_cubierta = columna in cobertura["columnas"]
+
+                if not fila_cubierta and not columna_cubierta:
+                    matriz[fila][columna] -= menor
+                elif fila_cubierta and columna_cubierta:
+                    matriz[fila][columna] += menor
+
+    def __formatear_indices(self, indices):
+        if not indices:
+            return "ninguna"
+        return ", ".join(str(indice + 1) for indice in sorted(indices))
+
+
+# Carga los dos ejercicios del enunciado
+class ProyectoProgramacionMatematica:
+    def __init__(self):
+        self.__problemas = [
+            ProblemaAsignacion(
+                "Problema 1: contratacion de programadores para tareas",
+                ["Programador 1", "Programador 2", "Programador 3", "Programador 4"],
+                ["Tarea 1", "Tarea 2", "Tarea 3", "Tarea 4"],
+                [
+                    [10, 15, 9, 7],
+                    [14, 18, 12, 11],
+                    [6, 14, 12, 8],
+                    [9, 13, 14, 10],
+                ],
+                "miles de USD",
+            ),
+            ProblemaAsignacion(
+                "Problema 2: asignacion de programadores a modulos",
+                ["Programador 1", "Programador 2", "Programador 3"],
+                ["Modulo 1", "Modulo 2", "Modulo 3"],
+                [
+                    [12, 9, 10],
+                    [10, 8, 11],
+                    [13, 11, 10],
+                ],
+                "horas",
+            ),
+        ]
+
+    def ejecutar(self):
+        metodo = MetodoHungaro()
+        for problema in self.__problemas:
+            resultado = metodo.resolver(problema)
+            resultado.imprimir()
 
 
 if __name__ == "__main__":
-    problema = ProblemaTransporte()
-    problema.imprimir_resumen()
+    proyecto = ProyectoProgramacionMatematica()
+    proyecto.ejecutar()
