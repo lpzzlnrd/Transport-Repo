@@ -1,0 +1,215 @@
+/* ===========================================================================
+   estilos.css — NexusCore Systems · Tema oscuro minimalista
+   ---------------------------------------------------------------------------
+   CSS puro (sin frameworks). Paleta oscura, tipografía sobria, mucho espacio
+   en blanco (negro) y acentos discretos. Los iconos son SVG de Lucide
+   embebidos en el HTML; aquí solo se les da tamaño y color (currentColor).
+   Incluye reglas @media print para el PDF (fondo claro y legible).
+   =========================================================================== */
+
+:root {
+    --fondo: #0b0d10;          /* fondo general casi negro */
+    --superficie: #14171c;     /* tarjetas / paneles */
+    --superficie-2: #1b1f26;   /* inputs, celdas */
+    --borde: #262b33;
+    --borde-suave: #1f242b;
+    --texto: #e6e9ee;          /* texto principal */
+    --texto-tenue: #9aa4b2;    /* texto secundario */
+    --texto-debil: #6b7480;    /* etiquetas */
+    --acento: #6ea8fe;         /* azul tenue de acento */
+    --acento-fuerte: #3b82f6;
+    --ok: #4ade80;
+    --aviso: #fbbf24;
+    --radio: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--texto);
+    background: var(--fondo);
+    line-height: 1.5;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Iconos Lucide ---------- */
+.ic {
+    width: 16px; height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+    vertical-align: -3px;
+}
+
+/* ---------- Encabezado / membrete ---------- */
+.membrete {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 22px 40px;
+    border-bottom: 1px solid var(--borde);
+    background: var(--fondo);
+}
+.membrete-marca { display: flex; align-items: center; gap: 16px; }
+.logo {
+    width: 44px; height: 44px;
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; letter-spacing: 1px;
+    color: var(--acento);
+    background: var(--superficie);
+}
+.membrete h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -.2px; }
+.membrete p { margin: 2px 0 0; color: var(--texto-tenue); font-size: 13px; }
+.membrete-meta { display: flex; flex-direction: column; text-align: right; font-size: 12px; color: var(--texto-debil); gap: 2px; }
+
+/* ---------- Pestañas ---------- */
+.tabs { display: flex; gap: 4px; padding: 0 40px; border-bottom: 1px solid var(--borde); }
+.tab {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: none; background: none; cursor: pointer;
+    padding: 14px 4px; margin-right: 24px;
+    font-size: 14px; font-weight: 500; color: var(--texto-debil);
+    border-bottom: 2px solid transparent;
+    transition: color .15s;
+}
+.tab:hover { color: var(--texto); }
+.tab.activo { color: var(--texto); border-bottom-color: var(--acento); }
+
+/* ---------- Paneles ---------- */
+main { max-width: 1080px; margin: 0 auto; padding: 32px 40px 80px; }
+.panel { display: none; }
+.panel.activo { display: block; }
+h2 {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 20px; font-weight: 600; letter-spacing: -.3px;
+    margin: 0 0 6px;
+}
+h2 .ic { width: 20px; height: 20px; color: var(--acento); }
+.descripcion { color: var(--texto-tenue); max-width: 720px; margin: 0 0 24px; font-size: 14px; }
+
+/* ---------- Controles ---------- */
+.controles { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin: 18px 0; }
+.controles label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 500; color: var(--texto-debil); }
+.controles label span { display: inline-flex; align-items: center; gap: 6px; }
+.controles input {
+    padding: 9px 12px;
+    background: var(--superficie-2);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    color: var(--texto);
+    font-size: 14px; min-width: 100px;
+    transition: border-color .15s;
+}
+.controles input:focus { outline: none; border-color: var(--acento); }
+.controles input::placeholder { color: var(--texto-debil); }
+.api-key input { min-width: 260px; }
+
+/* ---------- Botones ---------- */
+button { font-family: inherit; }
+.btn-primario, .btn-secundario {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 16px; border-radius: var(--radio);
+    cursor: pointer; font-size: 14px; font-weight: 500;
+    border: 1px solid var(--borde);
+    transition: background .15s, border-color .15s;
+}
+.btn-primario { background: var(--acento-fuerte); color: #fff; border-color: var(--acento-fuerte); }
+.btn-primario:hover { background: #2f6fe0; }
+.btn-secundario { background: var(--superficie); color: var(--texto); }
+.btn-secundario:hover { border-color: var(--acento); color: var(--acento); }
+
+/* ---------- Tablas editables ---------- */
+.matriz-wrap { overflow-x: auto; margin: 4px 0; }
+.tabla-editable {
+    border-collapse: separate; border-spacing: 0;
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    overflow: hidden;
+}
+.tabla-editable th, .tabla-editable td { border-bottom: 1px solid var(--borde-suave); border-right: 1px solid var(--borde-suave); padding: 4px; text-align: center; }
+.tabla-editable tr:last-child td, .tabla-editable tr:last-child th { border-bottom: none; }
+.tabla-editable th:last-child, .tabla-editable td:last-child { border-right: none; }
+.tabla-editable th { background: var(--superficie-2); font-size: 12px; font-weight: 600; color: var(--texto-tenue); }
+.tabla-editable input { width: 110px; border: none; text-align: center; font-size: 13px; padding: 8px 6px; background: transparent; color: var(--texto); }
+.tabla-editable input[type="number"] { width: 76px; }
+.tabla-editable input:focus { outline: none; background: var(--superficie-2); }
+.col-oferta { background: rgba(110,168,254,.06); color: var(--acento); }
+.fila-demanda td { background: rgba(110,168,254,.06); font-weight: 600; }
+
+/* ---------- Balanceo ---------- */
+.balanceo {
+    display: flex; align-items: center; gap: 8px;
+    margin: 16px 0; padding: 11px 14px;
+    border-radius: var(--radio); font-size: 13px; font-weight: 500;
+    border: 1px solid var(--borde);
+}
+.balanceo .ic { width: 16px; height: 16px; }
+.balanceo.ok { color: var(--ok); border-color: rgba(74,222,128,.3); background: rgba(74,222,128,.06); }
+.balanceo.aviso { color: var(--aviso); border-color: rgba(251,191,36,.3); background: rgba(251,191,36,.06); }
+
+/* ---------- Resultados ---------- */
+.resultados { margin-top: 28px; }
+.estado-balanceo { font-weight: 500; color: var(--texto-tenue); font-size: 14px; }
+.metodo {
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    padding: 18px 22px; margin-bottom: 16px;
+}
+.metodo h3 { margin: 0 0 12px; font-size: 15px; font-weight: 600; color: var(--texto); }
+.pasos { font-size: 13px; color: var(--texto-tenue); margin: 0 0 14px; padding-left: 18px; }
+.pasos li { margin-bottom: 5px; }
+.tabla-resultado { border-collapse: collapse; margin: 8px 0; width: 100%; }
+.tabla-resultado th, .tabla-resultado td { border: 1px solid var(--borde); padding: 7px 10px; text-align: center; font-size: 13px; }
+.tabla-resultado th { background: var(--superficie-2); color: var(--texto-tenue); font-weight: 600; }
+.costo-total { font-weight: 600; color: var(--acento); margin: 10px 0 0; }
+.detalle { font-size: 13px; color: var(--texto-debil); }
+.mejor-metodo {
+    border: 1px solid rgba(110,168,254,.3);
+    background: rgba(110,168,254,.06);
+    border-radius: var(--radio);
+    padding: 14px 18px; color: var(--acento); font-size: 14px;
+}
+
+/* ---------- Parte III / Informe IA ---------- */
+.panel-ia, .informe {
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    padding: 22px 26px; margin-top: 16px;
+}
+.panel-ia h2, .informe h2 { font-size: 17px; }
+#informe-contenido { white-space: pre-wrap; font-size: 14px; color: var(--texto-tenue); line-height: 1.6; }
+.oculto { display: none; }
+
+.pie { text-align: center; color: var(--texto-debil); font-size: 12px; padding: 28px; border-top: 1px solid var(--borde); }
+
+/* ===========================================================================
+   IMPRESIÓN / PDF — se activa con window.print() (Exportar PDF)
+   Pasa a fondo claro y legible; oculta los controles interactivos.
+   =========================================================================== */
+@media print {
+    :root {
+        --fondo: #fff; --superficie: #fff; --superficie-2: #f4f6f9;
+        --borde: #cbd2db; --borde-suave: #e2e6ec;
+        --texto: #14171c; --texto-tenue: #3a434f; --texto-debil: #5a6573;
+        --acento: #2f6fe0;
+    }
+    .no-print { display: none !important; }
+    body { background: #fff; }
+    .panel { display: block !important; }       /* imprime ambos módulos */
+    .membrete { border-bottom: 2px solid var(--acento); }
+    .metodo, .informe, .mejor-metodo, .tabla-editable { break-inside: avoid; }
+    main { max-width: none; }
+}

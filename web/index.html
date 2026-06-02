@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusCore Systems — Logística y Optimización de Talento</title>
+    <link rel="stylesheet" href="estilos/estilos.css">
+</head>
+<body>
+    <!-- ============================================================
+         ICONOS LUCIDE (https://lucide.dev) embebidos como sprite SVG.
+         Lucide es MIT; aquí se incluyen los paths INLINE para no
+         depender de ningún CDN ni librería externa. Cada icono se usa
+         luego con <svg class="ic"><use href="#nombre"></use></svg>.
+         ============================================================ -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <defs>
+            <g id="ic-network"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M12 8v3m0 0-5.2 5M12 11l5.2 5"/></g>
+            <g id="ic-users"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></g>
+            <g id="ic-grid"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></g>
+            <g id="ic-file"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></g>
+            <g id="ic-play"><path d="m6 3 14 9-14 9V3z"/></g>
+            <g id="ic-cpu"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></g>
+            <g id="ic-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></g>
+            <g id="ic-check"><path d="M20 6 9 17l-5-5"/></g>
+            <g id="ic-alert"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></g>
+            <g id="ic-key"><path d="M2.5 18.5 11 10a5 5 0 1 1 3 3l-8.5 8.5L2.5 18.5z"/><path d="m9 12 3 3"/><circle cx="16.5" cy="7.5" r="0"/></g>
+            <g id="ic-sparkles"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/><path d="M19 3v4M21 5h-4M5 17v2M6 18H4"/></g>
+            <g id="ic-briefcase"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></g>
+        </defs>
+    </svg>
+
+    <!-- ============================================================
+         ENCABEZADO / MEMBRETE (también se usa en el PDF exportado)
+         ============================================================ -->
+    <header class="membrete">
+        <div class="membrete-marca">
+            <div class="logo">NX</div>
+            <div>
+                <h1>NexusCore Systems</h1>
+                <p>Logística y Optimización de Talento</p>
+            </div>
+        </div>
+        <div class="membrete-meta">
+            <span id="fecha-hoy"></span>
+            <span>Universidad José Antonio Páez · Programación Matemática</span>
+        </div>
+    </header>
+
+    <!-- Pestañas para cambiar entre los dos módulos -->
+    <nav class="tabs no-print">
+        <button class="tab activo" data-tab="transporte">
+            <svg class="ic"><use href="#ic-network"></use></svg>Parte I · Transporte
+        </button>
+        <button class="tab" data-tab="asignacion">
+            <svg class="ic"><use href="#ic-users"></use></svg>Parte II · Asignación
+        </button>
+    </nav>
+
+    <main>
+        <!-- ========================================================
+             PARTE I — MÓDULO DE TRANSPORTE
+             ======================================================== -->
+        <section id="panel-transporte" class="panel activo">
+            <h2><svg class="ic"><use href="#ic-network"></use></svg>Módulo de Transporte</h2>
+            <p class="descripcion">
+                Define el número de orígenes (m) y destinos (n). Edita los costos,
+                ofertas y demandas. El sistema valida el balanceo en tiempo real y
+                resuelve con los métodos de la Esquina Noroeste, Costo Mínimo y Vogel.
+            </p>
+
+            <!-- Controles de dimensiones -->
+            <div class="controles no-print">
+                <label>Orígenes (m)
+                    <input type="number" id="t-origenes" min="1" max="10" value="3">
+                </label>
+                <label>Destinos (n)
+                    <input type="number" id="t-destinos" min="1" max="10" value="4">
+                </label>
+                <button id="t-generar" class="btn-secundario">
+                    <svg class="ic"><use href="#ic-grid"></use></svg>Generar cuadrícula
+                </button>
+                <button id="t-ejemplo" class="btn-secundario">
+                    <svg class="ic"><use href="#ic-file"></use></svg>Cargar caso base
+                </button>
+            </div>
+
+            <!-- La matriz editable se inyecta aquí desde JS -->
+            <div id="t-matriz" class="matriz-wrap"></div>
+
+            <!-- Indicador de balanceo (se actualiza en vivo) -->
+            <div id="t-balanceo" class="balanceo"></div>
+
+            <div class="controles no-print">
+                <button id="t-resolver" class="btn-primario">
+                    <svg class="ic"><use href="#ic-play"></use></svg>Resolver transporte
+                </button>
+            </div>
+
+            <!-- Resultados de los 3 métodos -->
+            <div id="t-resultados" class="resultados"></div>
+        </section>
+
+        <!-- ========================================================
+             PARTE II — MÓDULO DE ASIGNACIÓN (MÉTODO HÚNGARO)
+             ======================================================== -->
+        <section id="panel-asignacion" class="panel">
+            <h2><svg class="ic"><use href="#ic-users"></use></svg>Módulo de Asignación (Húngaro)</h2>
+            <p class="descripcion">
+                Matriz cuadrada N×N. Define los nombres de los ingenieros, las
+                actividades y los tiempos en días. El sistema muestra todos los pasos
+                del Método Húngaro hasta la asignación óptima.
+            </p>
+
+            <div class="controles no-print">
+                <label>Tamaño (N×N)
+                    <input type="number" id="a-tamano" min="1" max="10" value="4">
+                </label>
+                <button id="a-generar" class="btn-secundario">
+                    <svg class="ic"><use href="#ic-grid"></use></svg>Generar cuadrícula
+                </button>
+                <button id="a-ejemplo" class="btn-secundario">
+                    <svg class="ic"><use href="#ic-file"></use></svg>Cargar caso base
+                </button>
+            </div>
+
+            <div id="a-matriz" class="matriz-wrap"></div>
+
+            <div class="controles no-print">
+                <button id="a-resolver" class="btn-primario">
+                    <svg class="ic"><use href="#ic-play"></use></svg>Resolver asignación
+                </button>
+            </div>
+
+            <div id="a-resultados" class="resultados"></div>
+        </section>
+
+        <!-- ========================================================
+             PARTE III — GROQ + EXPORTAR PDF
+             ======================================================== -->
+        <section class="panel-ia no-print">
+            <h2><svg class="ic"><use href="#ic-cpu"></use></svg>Parte III · Análisis con IA y Reporte</h2>
+            <p class="descripcion">
+                "Optimizar y Analizar" envía los datos y resultados activos al backend,
+                que lee la API Key de Groq desde el archivo .env y consulta al modelo.
+                La IA actúa como Director de Operaciones (COO) e interpreta el impacto
+                operacional. Luego puedes exportar todo a PDF.
+            </p>
+            <div class="controles">
+                <button id="btn-analizar" class="btn-primario">
+                    <svg class="ic"><use href="#ic-sparkles"></use></svg>Optimizar y Analizar
+                </button>
+                <button id="btn-pdf" class="btn-secundario">
+                    <svg class="ic"><use href="#ic-download"></use></svg>Exportar PDF
+                </button>
+            </div>
+        </section>
+
+        <!-- El informe de la IA se renderiza aquí (sí aparece en el PDF) -->
+        <section id="informe-ia" class="informe oculto">
+            <h2><svg class="ic"><use href="#ic-briefcase"></use></svg>Informe del Director de Operaciones (IA)</h2>
+            <div id="informe-contenido"></div>
+        </section>
+    </main>
+
+    <footer class="pie no-print">
+        NexusCore Systems · Proyecto IV de Programación Matemática
+    </footer>
+
+    <!-- ============================================================
+         CARGA DE SCRIPTS (JS vanilla, sin librerías externas)
+         Orden por capas de la ARQUITECTURA HEXAGONAL:
+           1) Dominio        → reglas de negocio puras (algoritmos)
+           2) Aplicación     → puertos (contratos) + casos de uso
+           3) Infraestructura→ adaptadores (Groq, PDF) + UI (vista, controlador)
+         Cada capa solo depende de las anteriores, nunca al revés.
+         ============================================================ -->
+
+    <!-- 1) DOMINIO -->
+    <script src="dominio/ProblemaTransporte.js"></script>
+    <script src="dominio/ProblemaAsignacion.js"></script>
+
+    <!-- 2) APLICACIÓN -->
+    <script src="aplicacion/puertos.js"></script>
+    <script src="aplicacion/casosDeUso.js"></script>
+
+    <!-- 3) INFRAESTRUCTURA -->
+    <script src="infraestructura/adaptadores/AdaptadorGroq.js"></script>
+    <script src="infraestructura/adaptadores/AdaptadorReportePDF.js"></script>
+    <script src="infraestructura/ui/datosPorDefecto.js"></script>
+    <script src="infraestructura/ui/Vista.js"></script>
+    <script src="infraestructura/ui/Controlador.js"></script>
+</body>
+</html>
